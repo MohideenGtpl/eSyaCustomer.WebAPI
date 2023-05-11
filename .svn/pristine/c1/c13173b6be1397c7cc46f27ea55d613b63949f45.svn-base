@@ -1,0 +1,238 @@
+﻿using eSyaCustomer.DL.Entities;
+using eSyaCustomer.DO;
+using eSyaCustomer.IF;
+using Microsoft.EntityFrameworkCore;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace eSyaCustomer.DL.Repository
+{
+    public class PatientPreRegistrationRepository : IPatientPreRegistrationRepository
+    {
+        public async Task<List<DO_PatientPreRegistration>> GetPatientPreRegistrationsbyBusinessKey(int Businesskey)
+        {
+            try
+            {
+                using (var db = new eSyaEnterprise())
+                {
+                    var ds = db.GtEopprr.Where(p => p.BusinessKey == Businesskey)
+                        .Select(x => new DO_PatientPreRegistration
+                        {
+
+                            BusinessKey = x.BusinessKey,
+                            Prkey = x.Prkey,
+                            Prdate = x.Prdate,
+                            PatientFirstName = x.PatientFirstName,
+                            PatientMiddleName = x.PatientMiddleName,
+                            PatientLastName = x.PatientLastName,
+                            Gender = x.Gender,
+                            AgeYy = x.AgeYy,
+                            DateOfBirth = x.DateOfBirth,
+                            MaritalStatus = x.MaritalStatus,
+                            NoOfChildren = x.NoOfChildren,
+                            Isdcode = x.Isdcode,
+                            MobileNumber = x.MobileNumber,
+                            EmailId = x.EmailId,
+                            Nationality = x.Nationality,
+                            Address = x.Address,
+                            City = x.City,
+                            Pincode = x.Pincode,
+                            AreaCode = x.AreaCode,
+                            Occupation = x.Occupation,
+                            PreferredLanguage = x.PreferredLanguage,
+                            Relationship = x.Relationship,
+                            RelationName = x.RelationName,
+                            ReferredBy = x.ReferredBy,
+                            PresentComplaints = x.PresentComplaints,
+                            PreExistingHealthCondition = x.PreExistingHealthCondition,
+                            RUhid = x.RUhid,
+                            ActiveStatus = x.ActiveStatus
+                        }).ToListAsync();
+
+                    return await ds;
+                }
+
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+
+        public async Task<DO_ReturnParameter> InsertPatientPreRegistration(DO_PatientPreRegistration obj)
+        {
+            using (var db = new eSyaEnterprise())
+            {
+                using (var dbContext = db.Database.BeginTransaction())
+                {
+                    try
+                    {
+
+                        int pr_Key = Convert.ToInt32(db.GtEopprr.Select(p => p.Prkey).DefaultIfEmpty().Max());
+                        pr_Key = pr_Key + 1;
+                        var pr_registration = new GtEopprr
+                        {
+                            BusinessKey = obj.BusinessKey,
+                            Prkey = pr_Key,
+                            Prdate = obj.Prdate,
+                            PatientFirstName = obj.PatientFirstName,
+                            PatientMiddleName = obj.PatientMiddleName,
+                            PatientLastName = obj.PatientLastName,
+                            Gender = obj.Gender,
+                            AgeYy = obj.AgeYy,
+                            DateOfBirth = obj.DateOfBirth,
+                            MaritalStatus = obj.MaritalStatus,
+                            NoOfChildren = obj.NoOfChildren,
+                            Isdcode = obj.Isdcode,
+                            MobileNumber = obj.MobileNumber,
+                            EmailId = obj.EmailId,
+                            Nationality = obj.Nationality,
+                            Address = obj.Address,
+                            City = obj.City,
+                            Pincode = obj.Pincode,
+                            AreaCode = obj.AreaCode,
+                            Occupation = obj.Occupation,
+                            PreferredLanguage = obj.PreferredLanguage,
+                            Relationship = obj.Relationship,
+                            RelationName = obj.RelationName,
+                            ReferredBy = obj.ReferredBy,
+                            PresentComplaints = obj.PresentComplaints,
+                            PreExistingHealthCondition = obj.PreExistingHealthCondition,
+                            RUhid = obj.RUhid,
+                            ActiveStatus = true,
+                            FormId = obj.FormId,
+                            CreatedBy = obj.UserID,
+                            CreatedOn = DateTime.Now,
+                            CreatedTerminal = obj.TerminalID
+                        };
+                        db.GtEopprr.Add(pr_registration);
+
+                        await db.SaveChangesAsync();
+                        dbContext.Commit();
+                        return new DO_ReturnParameter() { Status = true, Message = "Sucessfully Created" };
+
+                    }
+                    catch (DbUpdateException ex)
+                    {
+                        dbContext.Rollback();
+                        throw new Exception(CommonMethod.GetValidationMessageFromException(ex));
+                    }
+                    catch (Exception ex)
+                    {
+                        dbContext.Rollback();
+                        throw ex;
+                    }
+                }
+            }
+        }
+
+        public async Task<List<DO_IsdCodes>> GetISDCodes()
+        {
+            using (var db = new eSyaEnterprise())
+            {
+                var pf = db.GtEccncd
+               .Where(w => w.ActiveStatus)
+               .Select(s => new DO_IsdCodes
+               {
+                   IsdCode = s.Isdcode,
+                   CountryCode = s.CountryCode,
+                   CountryName = s.CountryName,
+                   CurrencyCode = s.CurrencyCode,
+                   MobileNumberPattern = s.MobileNumberPattern,
+                   Nationality = s.Nationality
+               })
+               .ToListAsync();
+                return await pf;
+            }
+        }
+
+        public async Task<List<DO_Place>> GetStateList(int isdCode)
+        {
+            using (var db = new eSyaEnterprise())
+            {
+                var pf = db.GtEccnpl
+               .Where(w => w.ActiveStatus && w.PlaceType == PlaceTypeValues.State && w.Isdcode == isdCode)
+               .Select(s => new DO_Place
+               {
+                   IsdCode = s.Isdcode,
+                   PlaceId = s.PlaceId,
+                   PlaceName = s.PlaceName
+               })
+               .ToListAsync();
+                return await pf;
+            }
+        }
+
+        public async Task<List<DO_Place>> GetCityList(int isdCode, int? stateCode)
+        {
+            using (var db = new eSyaEnterprise())
+            {
+                var pf = db.GtAddrin
+                .Join(db.GtEccnpl.Where(w => w.PlaceType == PlaceTypeValues.City && w.ActiveStatus),
+                    a => new { a.CityCode },
+                    c => new { CityCode = c.PlaceId },
+                    (a, c) => new { a, c })
+               .Where(w => w.a.ActiveStatus && (w.a.StateCode == stateCode || stateCode == null))
+               .Select(s => new DO_Place
+               {
+                   IsdCode = s.a.Isdcode,
+                   PlaceId = s.c.PlaceId,
+                   PlaceName = s.c.PlaceName
+               })
+               .Distinct()
+               .ToListAsync();
+                return await pf;
+            }
+        }
+
+        public async Task<List<DO_AddressIN>> GetAreaList(int isdCode, int? stateCode, int? cityCode, string pincode)
+        {
+            using (var db = new eSyaEnterprise())
+            {
+                var pf = db.GtAddrin
+               .Where(w => w.ActiveStatus
+                    && w.Isdcode == isdCode
+                    && (w.StateCode == stateCode || stateCode == null)
+                    && (w.CityCode == cityCode || cityCode == null)
+                    && (w.Pincode == pincode || pincode == null))
+               .Select(s => new DO_AddressIN
+               {
+                   IsdCode = s.Isdcode,
+                   AreaCode = s.AreaCode,
+                   AreaName = s.AreaName,
+                   StateCode = s.StateCode,
+                   CityCode = s.CityCode,
+                   District = s.District,
+                   Pincode = s.Pincode
+               })
+               .ToListAsync();
+                return await pf;
+            }
+        }
+
+        public async Task<DO_AddressIN> GetAreaDetailsbyPincode(int isdCode,string pincode)
+        {
+            using (var db = new eSyaEnterprise())
+            {
+                var pf = db.GtAddrin
+               .Where(w => w.ActiveStatus
+                    && w.Isdcode == isdCode && w.Pincode == pincode)
+               .Select(s => new DO_AddressIN
+               {
+                   IsdCode = s.Isdcode,
+                   AreaCode = s.AreaCode,
+                   AreaName = s.AreaName,
+                   StateCode = s.StateCode,
+                   CityCode = s.CityCode,
+                   District = s.District,
+                   Pincode = s.Pincode
+               })
+               .FirstOrDefaultAsync();
+                return await pf;
+            }
+        }
+    }
+}

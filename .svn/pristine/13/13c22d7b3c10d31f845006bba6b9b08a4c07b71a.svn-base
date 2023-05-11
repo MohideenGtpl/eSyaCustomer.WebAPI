@@ -1,0 +1,228 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using eSyaCustomer.DL.Entities;
+using eSyaCustomer.DO;
+using eSyaCustomer.IF;
+using Microsoft.EntityFrameworkCore;
+
+namespace eSyaCustomer.DL.Repository
+{
+    public class PatientCategoryDiscountRepository : IPatientCategoryDiscountRepository
+    {
+        #region Patient Category Discount Service Class Wise
+
+        public async Task<List<DO_PatientCategoryDiscount>> GetPatientCatDiscClassByBkPtCatSfSg(int businessKey, int patientCategory,string serviceFor, int serviceGroupId)
+        {
+            using (var db = new eSyaEnterprise())
+            {
+                try
+                {
+                    var pc_dc = db.GtEssrcl
+                        .GroupJoin(db.GtEspcdc.Where(w => w.BusinessKey == businessKey && w.PatientCategory == patientCategory && w.ServiceFor == serviceFor),
+                        m => new { m.ServiceClassId},
+                        c => new { ServiceClassId = c.ServiceClass},
+                        (m, c) => new { m, c = c.FirstOrDefault() }).DefaultIfEmpty()
+                        .Where(w => w.m.ServiceGroupId == serviceGroupId && w.m.ActiveStatus)
+                        .AsNoTracking()
+                        .Select(r => new DO_PatientCategoryDiscount
+                        {
+                            BusinessKey = r.c != null ? r.c.BusinessKey : 0,
+                            PatientCategory = r.c != null ? r.c.PatientCategory : 0,
+                            ServiceFor = r.c != null ? r.c.ServiceFor : null,
+                            ServiceClass = r.c!= null ? r.c.ServiceClass : r.m.ServiceClassId,
+                            ServiceClassDesc = r.m.ServiceClassDesc,
+                            DiscountRule = r.c != null ? r.c.DiscountRule : "F",
+                            DiscountPercent = r.c != null ? r.c.DiscountPercent : 0,
+                            ActiveStatus = r.c != null ? r.c.ActiveStatus : true
+                        }).ToListAsync();
+
+                    return await pc_dc;
+                }
+                catch (DbUpdateException ex)
+                {
+                    throw new Exception(CommonMethod.GetValidationMessageFromException(ex));
+                }
+                catch (Exception ex)
+                {
+                    throw ex;
+                }
+            }
+        }
+
+        public async Task<DO_ReturnParameter> InsertOrUpdatePatientCatDiscClass(List<DO_PatientCategoryDiscount> obj)
+        {
+            using (var db = new eSyaEnterprise())
+            {
+                using (var dbContext = db.Database.BeginTransaction())
+                {
+                    try
+                    {
+                        foreach (var dc in obj.Where(w => w.BusinessKey > 0))
+                        {
+                            GtEspcdc pc_dc = db.GtEspcdc.Where(w => w.BusinessKey == dc.BusinessKey && w.PatientCategory == dc.PatientCategory
+                            && w.ServiceFor == dc.ServiceFor && w.ServiceClass == dc.ServiceClass).FirstOrDefault();
+
+                            if (pc_dc == null)
+                            {
+                                if (dc.DiscountPercent > 0)
+                                {
+                                    var o_pcdc = new GtEspcdc
+                                    {
+                                        BusinessKey = dc.BusinessKey,
+                                        PatientCategory = dc.PatientCategory,
+                                        ServiceFor = dc.ServiceFor,
+                                        ServiceClass = dc.ServiceClass,
+                                        DiscountRule = dc.DiscountRule,
+                                        DiscountPercent = dc.DiscountPercent,
+                                        ActiveStatus = dc.ActiveStatus,
+                                        //FormId = dc.FormID,
+                                        CreatedBy = dc.UserID,
+                                        CreatedOn = System.DateTime.Now,
+                                        CreatedTerminal = dc.TerminalID,
+                                    };
+                                    db.GtEspcdc.Add(o_pcdc);
+                                }
+                            }
+                            else if (pc_dc != null)
+                            {
+                                pc_dc.DiscountRule = dc.DiscountRule;
+                                pc_dc.DiscountPercent = dc.DiscountPercent;
+                                pc_dc.ActiveStatus = dc.ActiveStatus;
+                                pc_dc.ModifiedBy = dc.UserID;
+                                pc_dc.ModifiedOn = System.DateTime.Now;
+                                pc_dc.ModifiedTerminal = dc.TerminalID;
+                            }
+                            await db.SaveChangesAsync();
+                        }
+
+                        dbContext.Commit();
+                        return new DO_ReturnParameter() { Status = true, Message = "Saved Successfully." };
+                    }
+                    catch (DbUpdateException ex)
+                    {
+                        dbContext.Rollback();
+                        throw new Exception(CommonMethod.GetValidationMessageFromException(ex));
+                    }
+                    catch (Exception ex)
+                    {
+                        dbContext.Rollback();
+                        throw ex;
+                    }
+                }
+            }
+        }
+
+        #endregion Patient Category Discount Service Class Wise
+
+        #region Patient Category Discount Service Code Wise
+
+        public async Task<List<DO_PatientCategoryDiscount>> GetPatientCatDiscServiceByBkPtCatSfSg(int businessKey, int patientCategory, string serviceFor, int serviceGroupId)
+        {
+            using (var db = new eSyaEnterprise())
+            {
+                try
+                {
+                    var pc_ds = db.GtEssrms
+                        .Include(r => r.ServiceClass)
+                        .GroupJoin(db.GtEspcds.Where(w => w.BusinessKey == businessKey && w.PatientCategory == patientCategory && w.ServiceFor == serviceFor),
+                        m => new { m.ServiceId },
+                        s => new { ServiceId = s.ServiceCode },
+                        (m, s) => new { m, s = s.FirstOrDefault() })
+                        .Where(w => w.m.ServiceClass.ServiceGroupId == serviceGroupId && w.m.ActiveStatus)
+                        .AsNoTracking()
+                        .Select(r => new DO_PatientCategoryDiscount
+                        {
+                            BusinessKey = r.s != null ? r.s.BusinessKey : 0,
+                            PatientCategory = r.s != null ? r.s.PatientCategory : 0,
+                            ServiceFor = r.s != null ? r.s.ServiceFor : null,
+                            ServiceClass = r.m.ServiceClassId,
+                            ServiceClassDesc = r.m.ServiceClass.ServiceClassDesc,
+                            ServiceCode = r.m.ServiceId,
+                            ServiceDesc = r.m.ServiceDesc,
+                            DiscountRule = r.s != null ? r.s.DiscountRule : "F",
+                            DiscountPercent = r.s != null ? r.s.DiscountPercent : 0,
+                            ActiveStatus = r.s != null ? r.s.ActiveStatus : true
+                        }).ToListAsync();
+
+                    return await pc_ds;
+                }
+                catch (DbUpdateException ex)
+                {
+                    throw new Exception(CommonMethod.GetValidationMessageFromException(ex));
+                }
+                catch (Exception ex)
+                {
+                    throw ex;
+                }
+            }
+        }
+
+        public async Task<DO_ReturnParameter> InsertOrUpdatePatientCatDiscService(List<DO_PatientCategoryDiscount> obj)
+        {
+            using (var db = new eSyaEnterprise())
+            {
+                using (var dbContext = db.Database.BeginTransaction())
+                {
+                    try
+                    {
+                        foreach (var dc in obj.Where(w => w.BusinessKey > 0))
+                        {
+                            GtEspcds pc_ds = db.GtEspcds.Where(w => w.BusinessKey == dc.BusinessKey && w.PatientCategory == dc.PatientCategory
+                            && w.ServiceFor == dc.ServiceFor && w.ServiceCode == dc.ServiceCode).FirstOrDefault();
+
+                            if (pc_ds == null)
+                            {
+                                if (dc.DiscountPercent > 0)
+                                {
+                                    var o_pcds = new GtEspcds
+                                    {
+                                        BusinessKey = dc.BusinessKey,
+                                        PatientCategory = dc.PatientCategory,
+                                        ServiceFor = dc.ServiceFor,
+                                        ServiceCode = dc.ServiceCode,
+                                        DiscountRule = dc.DiscountRule,
+                                        DiscountPercent = dc.DiscountPercent,
+                                        ActiveStatus = dc.ActiveStatus,
+                                        //FormId = dc.FormID,
+                                        CreatedBy = dc.UserID,
+                                        CreatedOn = System.DateTime.Now,
+                                        CreatedTerminal = dc.TerminalID,
+                                    };
+                                    db.GtEspcds.Add(o_pcds);
+                                }
+                            }
+                            else if (pc_ds != null)
+                            {
+                                pc_ds.DiscountRule = dc.DiscountRule;
+                                pc_ds.DiscountPercent = dc.DiscountPercent;
+                                pc_ds.ActiveStatus = dc.ActiveStatus;
+                                pc_ds.ModifiedBy = dc.UserID;
+                                pc_ds.ModifiedOn = System.DateTime.Now;
+                                pc_ds.ModifiedTerminal = dc.TerminalID;
+                            }
+                            await db.SaveChangesAsync();
+                        }
+
+                        dbContext.Commit();
+                        return new DO_ReturnParameter() { Status = true, Message = "Saved Successfully." };
+                    }
+                    catch (DbUpdateException ex)
+                    {
+                        dbContext.Rollback();
+                        throw new Exception(CommonMethod.GetValidationMessageFromException(ex));
+                    }
+                    catch (Exception ex)
+                    {
+                        dbContext.Rollback();
+                        throw ex;
+                    }
+                }
+            }
+        }
+
+        #endregion Patient Category Discount Service Code Wise
+    }
+}

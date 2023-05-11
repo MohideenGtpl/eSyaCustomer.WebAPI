@@ -1,0 +1,108 @@
+﻿using eSyaCustomer.DO;
+using eSyaCustomer.IF;
+using Microsoft.AspNetCore.Mvc;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+
+namespace eSyaCustomer.WebAPI.Controllers
+{
+    [Route("api/[controller]/[action]")]
+    [ApiController]
+    public class CustomerMasterController : ControllerBase
+    {
+        private readonly ICustomerMasterRepository _CustomerMasterRepository;
+        public CustomerMasterController(ICustomerMasterRepository customerMasterRepository)
+        {
+            _CustomerMasterRepository = customerMasterRepository;
+        }
+
+        /// <summary>
+        /// Get Customer Code Detail Information By Customer Name Prefix
+        /// UI Reffered - Customer Code
+        /// </summary>
+        /// <param name="customerNamePrefix"></param>
+        /// <returns></returns>
+        [HttpGet]
+        public async Task<IActionResult> GetCustomerCodeInformationByNamePrefix(string customerNamePrefix)
+        {
+            var pa_rm = await _CustomerMasterRepository.GetCustomerCodeInformationByNamePrefix(customerNamePrefix);
+            return Ok(pa_rm);
+        }
+
+        /// <summary>
+        /// Get Customer Code Information By Customer Id
+        /// UI Reffered - Customer Code
+        /// </summary>
+        /// <param name="customerId"></param>
+        /// <returns></returns>
+        [HttpGet]
+        public async Task<IActionResult> GetCustomerCodeInformationByCustomerId(int customerId)
+        {
+            var pa_rm = await _CustomerMasterRepository.GetCustomerCodeInformationByCustomerId(customerId);
+            return Ok(pa_rm);
+        }
+
+        /// <summary>
+        /// Insert into Customer Code.
+        /// UI Reffered - Customer Code
+        /// </summary>
+        [HttpPost]
+        public async Task<IActionResult> InsertIntoCustomerCode(DO_CustomerCodes obj)
+        {
+            var msg = await _CustomerMasterRepository.InsertIntoCustomerCode(obj);
+            return Ok(msg);
+
+        }
+
+        /// <summary>
+        /// Update Customer Code.
+        /// UI Reffered - Customer Code
+        /// </summary>
+        [HttpPost]
+        public async Task<IActionResult> UpdateCustomerCode(DO_CustomerCodes obj)
+        {
+            var msg = await _CustomerMasterRepository.UpdateCustomerCode(obj);
+            return Ok(msg);
+
+        }
+
+        /// <summary>
+        /// Get Customer Contact Information By Customer Id
+        /// UI Reffered - Customer Code
+        /// </summary>
+        /// <param name="customerId"></param>
+        /// <returns></returns>
+        [HttpGet]
+        public async Task<IActionResult> GetCustomerContactInformationByCustomerId(int customerId)
+        {
+            var pa_rm = await _CustomerMasterRepository.GetCustomerContactInformationByCustomerId(customerId);
+            return Ok(pa_rm);
+        }
+
+        /// <summary>
+        /// Insert into Customer Contact.
+        /// UI Reffered - Customer Code
+        /// </summary>
+        [HttpPost]
+        public async Task<IActionResult> InsertIntoCustomerContact(DO_CustomerContact obj)
+        {
+            var msg = await _CustomerMasterRepository.InsertIntoCustomerContact(obj);
+            return Ok(msg);
+
+        }
+
+        /// <summary>
+        /// Update Customer Contact.
+        /// UI Reffered - Customer Code
+        /// </summary>
+        [HttpPost]
+        public async Task<IActionResult> UpdateCustomerContact(DO_CustomerContact obj)
+        {
+            var msg = await _CustomerMasterRepository.UpdateCustomerContact(obj);
+            return Ok(msg);
+
+        }
+    }
+}

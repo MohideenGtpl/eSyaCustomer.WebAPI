@@ -1,0 +1,25 @@
+﻿using eSyaCustomer.DO;
+using System;
+using System.Collections.Generic;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace eSyaCustomer.IF
+{
+    public interface ICustomerMasterRepository
+    {
+        Task<List<DO_CustomerCodes>> GetCustomerCodeInformationByNamePrefix(string customerNamePrefix);
+
+        Task<List<DO_CustomerCodes>> GetCustomerCodeInformationByCustomerId(int customerId);
+
+        Task<DO_ReturnParameter> InsertIntoCustomerCode(DO_CustomerCodes obj);
+
+        Task<DO_ReturnParameter> UpdateCustomerCode(DO_CustomerCodes obj);
+
+        Task<List<DO_CustomerContact>> GetCustomerContactInformationByCustomerId(int customerId);
+
+        Task<DO_ReturnParameter> InsertIntoCustomerContact(DO_CustomerContact obj);
+
+        Task<DO_ReturnParameter> UpdateCustomerContact(DO_CustomerContact obj);
+    }
+}

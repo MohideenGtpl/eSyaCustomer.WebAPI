@@ -1,0 +1,22 @@
+﻿using eSyaCustomer.DO;
+using eSyaCustomer.IF;
+using Microsoft.AspNetCore.Mvc;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+
+namespace eSyaCustomer.WebAPI.Controllers
+{
+    [Route("api/[controller]/[action]")]
+    [ApiController]
+    public class PatientCategoryDiscountController : ControllerBase
+    {
+        private readonly IPatientCategoryDiscountRepository _PatientCategoryDiscountRepository;
+        public PatientCategoryDiscountController(IPatientCategoryDiscountRepository patientCategoryDiscountRepository)
+        {
+            _PatientCategoryDiscountRepository = patientCategoryDiscountRepository;
+        }
+
+    }
+}

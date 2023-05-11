@@ -1,0 +1,19 @@
+﻿using HCP.Customer.DO;
+using System;
+using System.Collections.Generic;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace HCP.Customer.IF
+{
+    public interface IPatientCategoryDiscountRepository
+    {
+        Task<List<DO_PatientCategoryDiscount>> GetPatientCatDiscClassByBkPtCatSfSg(int businessKey, int patientCategory, string serviceFor, int serviceGroupId);
+
+        Task<DO_ReturnParameter> InsertOrUpdatePatientCatDiscClass(List<DO_PatientCategoryDiscount> obj);
+
+        Task<List<DO_PatientCategoryDiscount>> GetPatientCatDiscServiceByBkPtCatSfSg(int businessKey, int patientCategory, string serviceFor, int serviceGroupId);
+
+        Task<DO_ReturnParameter> InsertOrUpdatePatientCatDiscService(List<DO_PatientCategoryDiscount> obj);
+    }
+}

@@ -1,0 +1,271 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using eSyaCustomer.DL.Entities;
+using eSyaCustomer.DO;
+using eSyaCustomer.IF;
+using Microsoft.EntityFrameworkCore;
+namespace eSyaCustomer.DL.Repository
+{
+    public class CustomerAttributesRepository:ICustomerAttributesRepository
+    {
+        public async Task<DO_CustomerAttributes> GetAllPatientTypesforTreeView(int CodeType)
+        {
+            try
+            {
+                using (eSyaEnterprise db = new eSyaEnterprise())
+                {
+                    DO_CustomerAttributes obj = new DO_CustomerAttributes();
+                    obj.l_PatientType = await db.GtEcapcd.Where(x=>x.CodeType== CodeType)
+                                   .Select(s => new DO_PatientType()
+                                   {
+                                       PatientTypeId = s.ApplicationCode,
+                                       Description = s.ApplicationCode + " - " + s.CodeDesc,
+                                       ActiveStatus=s.ActiveStatus
+                                   }).ToListAsync();
+                    obj.l_PatienTypeCategory = await db.GtEaptcg.Join(db.GtEcapcd,
+                         x => x.PatientCategoryId,
+                         y => y.ApplicationCode,
+                        (x, y) => new DO_PatientTypeCategory
+                        {
+                        PatientTypeId = x.PatientTypeId,
+                        PatientCategoryId = x.PatientCategoryId,
+                        TreatmentAllowedOp = x.TreatmentAllowedOp,
+                        TreatmentAllowedIp = x.TreatmentAllowedIp,
+                        IsSpecialtyLink = x.IsSpecialtyLink,
+                        Description = x.PatientCategoryId.ToString() + " - " + y.CodeDesc,
+                        ActiveStatus = x.ActiveStatus
+                    }).ToListAsync();
+                    return obj;
+                }
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+
+        public async Task<DO_PatientTypeCategory> GetPatientCategoryInfo(int PatientTypeId, int PatientCategoryId)
+        {
+            try
+            {
+                using (var db = new eSyaEnterprise())
+                {
+                    var pa_categories = db.GtEaptcg
+                        .Where(x=> x.PatientTypeId == PatientTypeId && x.PatientCategoryId==PatientCategoryId)
+                        .Select(pc => new DO_PatientTypeCategory
+                        {
+                           PatientTypeId=pc.PatientTypeId,
+                           PatientCategoryId=pc.PatientCategoryId,
+                           TreatmentAllowedOp=pc.TreatmentAllowedOp,
+                           TreatmentAllowedIp=pc.TreatmentAllowedIp,
+                           IsSpecialtyLink=pc.IsSpecialtyLink,
+                           ActiveStatus=pc.ActiveStatus
+                        }).FirstOrDefaultAsync();
+                    return await pa_categories;
+                }
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+
+        public async Task<DO_ReturnParameter> InsertPatientCategory(DO_PatientTypeCategory obj)
+        {
+            using (var db = new eSyaEnterprise())
+            {
+                using (var dbContext = db.Database.BeginTransaction())
+                {
+                    try
+                    {
+                        GtEaptcg pat_cat = db.GtEaptcg.Where(x => x.PatientTypeId == obj.PatientTypeId && x.PatientCategoryId == obj.PatientCategoryId).FirstOrDefault();
+                        if (pat_cat == null)
+                        {
+                            pat_cat = new GtEaptcg
+                            {
+                                PatientTypeId = obj.PatientTypeId,
+                                PatientCategoryId = obj.PatientCategoryId,
+                                TreatmentAllowedOp = obj.TreatmentAllowedOp,
+                                TreatmentAllowedIp = obj.TreatmentAllowedIp,
+                                IsSpecialtyLink = obj.IsSpecialtyLink,
+                                ActiveStatus = obj.ActiveStatus,
+                                FormId = obj.FormID,
+                                CreatedBy = obj.UserID,
+                                CreatedOn = System.DateTime.Now,
+                                CreatedTerminal = obj.TerminalID
+                            };
+                            db.GtEaptcg.Add(pat_cat);
+                            InsertOrUpdatePatientSpecialtyLink(obj);
+                            await db.SaveChangesAsync();
+                            dbContext.Commit();
+                            return new DO_ReturnParameter() { Status = true, Message = "Patient Category Linked Successfully." };
+                        }
+                        else
+                        {
+                          return new DO_ReturnParameter() { Status = false, Message = "Patient Category already Exists." };
+                        }
+                    }
+                    catch (DbUpdateException ex)
+                    {
+                        dbContext.Rollback();
+                        throw new Exception(CommonMethod.GetValidationMessageFromException(ex));
+                    }
+                    catch (Exception ex)
+                    {
+                        dbContext.Rollback();
+                        throw ex;
+                    }
+                }
+            }
+        }
+
+        public async Task<DO_ReturnParameter> UpdatePatientCategory(DO_PatientTypeCategory obj)
+        {
+            using (var db = new eSyaEnterprise())
+            {
+                using (var dbContext = db.Database.BeginTransaction())
+                {
+                    try
+                    {
+                        GtEaptcg pat_cat = db.GtEaptcg.Where(x => x.PatientTypeId == obj.PatientTypeId && x.PatientCategoryId == obj.PatientCategoryId).FirstOrDefault();
+                        pat_cat.TreatmentAllowedOp = obj.TreatmentAllowedOp;
+                        pat_cat.TreatmentAllowedIp = obj.TreatmentAllowedIp;
+                        pat_cat.IsSpecialtyLink = obj.IsSpecialtyLink;
+                        pat_cat.ActiveStatus = obj.ActiveStatus;
+                        pat_cat.ModifiedBy = obj.UserID;
+                        pat_cat.ModifiedOn = System.DateTime.Now;
+                        pat_cat.ModifiedTerminal = obj.TerminalID;
+                        
+                        InsertOrUpdatePatientSpecialtyLink(obj);
+                        await db.SaveChangesAsync();
+                        dbContext.Commit();
+
+                        return new DO_ReturnParameter() { Status = true, Message = "Patient Category Linked Updated Successfully." };
+                    }
+
+                    catch (DbUpdateException ex)
+                    {
+                        dbContext.Rollback();
+                        throw new Exception(CommonMethod.GetValidationMessageFromException(ex));
+                    }
+                    catch (Exception ex)
+                    {
+                        dbContext.Rollback();
+                        throw ex;
+                    }
+                }
+            }
+        }
+
+        public void InsertOrUpdatePatientSpecialtyLink(DO_PatientTypeCategory obj)
+        {
+            using (eSyaEnterprise db = new eSyaEnterprise())
+            {
+                using (var dbContext = db.Database.BeginTransaction())
+                {
+                    try
+                    {
+                        List<GtEaptcs> spe_links = db.GtEaptcs.Where(sl => sl.PatientTypeId == obj.PatientTypeId && sl.PatientCategoryId==obj.PatientCategoryId).ToList();
+                            if (spe_links.Count > 0)
+                            {
+                                foreach (var sp_link in spe_links)
+                                {
+                                    db.GtEaptcs.Remove(sp_link);
+                                    db.SaveChanges();
+                                }
+                            }
+                        if (obj.Speialtylink != null)
+                        {
+                            foreach (var key in obj.Speialtylink)
+                            {
+                                GtEaptcs objkeys = new GtEaptcs
+                                {
+                                    PatientTypeId = obj.PatientTypeId,
+                                    PatientCategoryId = obj.PatientCategoryId,
+                                    SpecialtyId= key,
+                                    ActiveStatus = obj.ActiveStatus,
+                                    FormId = obj.FormID,
+                                    CreatedBy = obj.UserID,
+                                    CreatedOn = DateTime.Now,
+                                    CreatedTerminal = obj.TerminalID
+                                };
+                                db.GtEaptcs.Add(objkeys);
+                                db.SaveChanges();
+                            }                            
+                        }
+                        dbContext.Commit();
+                    }
+                    catch (DbUpdateException ex)
+                    {
+                        dbContext.Rollback();
+                        throw new Exception(CommonMethod.GetValidationMessageFromException(ex));
+                    }
+                    catch (Exception ex)
+                    {
+                        dbContext.Rollback();
+                        throw ex;
+                    }
+                }
+            }
+        }
+
+        public async Task<List<DO_SpecialtyMaster>> GetSpecialtyMaster()
+        {
+            try
+            {
+                using (eSyaEnterprise db = new eSyaEnterprise())
+                {
+                    var sp_master = db.GtEsspcd.Where(x=>x.ActiveStatus==true)
+                           
+                            .Select(s => new DO_SpecialtyMaster
+                            {
+                                SpecialtyId=s.SpecialtyId,
+                                SpecialtyDesc=s.SpecialtyDesc,
+                                Gender=s.Gender,
+                                SpecialtyType=s.SpecialtyType,
+                                AlliedServices=s.AlliedServices
+                            }).ToListAsync();
+                    return await sp_master;
+                }
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+
+        public async Task<List<DO_PatientTypeSpecialty>> GetSpecialtyByPatientTypeAndCategory(int PatientTypeId,int PatientCategoryId)
+        {
+            try
+            {
+                using (eSyaEnterprise db = new eSyaEnterprise())
+                {
+
+                    var pt_sp = db.GtEaptcs.Where(x => x.PatientTypeId == PatientTypeId && x.PatientCategoryId== PatientCategoryId).
+                      Select(sp=> new DO_PatientTypeSpecialty
+                      {
+                          PatientTypeId=sp.PatientTypeId,
+                          PatientCategoryId=sp.PatientCategoryId,
+                          SpecialtyId=sp.SpecialtyId,
+                          ActiveStatus=sp.ActiveStatus
+                      }).ToListAsync();
+                    return await pt_sp;
+
+                }
+            }
+            catch (Exception)
+            {
+
+                throw;
+            }
+        }
+
+    }
+}
+
+
+
+

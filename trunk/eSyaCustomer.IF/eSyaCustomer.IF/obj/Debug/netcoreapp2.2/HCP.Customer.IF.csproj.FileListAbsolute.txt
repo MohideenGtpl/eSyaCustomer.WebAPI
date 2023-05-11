@@ -1,0 +1,24 @@
+D:\OfficeWorkingProjects\AllWEBAPI\eSyaCustomerWebAPI\eSyaCustomer.IF\eSyaCustomer.IF\bin\Debug\netcoreapp2.2\HCP.Customer.IF.deps.json
+D:\OfficeWorkingProjects\AllWEBAPI\eSyaCustomerWebAPI\eSyaCustomer.IF\eSyaCustomer.IF\bin\Debug\netcoreapp2.2\HCP.Customer.IF.dll
+D:\OfficeWorkingProjects\AllWEBAPI\eSyaCustomerWebAPI\eSyaCustomer.IF\eSyaCustomer.IF\bin\Debug\netcoreapp2.2\HCP.Customer.IF.pdb
+D:\OfficeWorkingProjects\AllWEBAPI\eSyaCustomerWebAPI\eSyaCustomer.IF\eSyaCustomer.IF\bin\Debug\netcoreapp2.2\HCP.Customer.DO.dll
+D:\OfficeWorkingProjects\AllWEBAPI\eSyaCustomerWebAPI\eSyaCustomer.IF\eSyaCustomer.IF\bin\Debug\netcoreapp2.2\HCP.Customer.DO.pdb
+D:\OfficeWorkingProjects\AllWEBAPI\eSyaCustomerWebAPI\eSyaCustomer.IF\eSyaCustomer.IF\obj\Debug\netcoreapp2.2\HCP.Customer.IF.csprojAssemblyReference.cache
+D:\OfficeWorkingProjects\AllWEBAPI\eSyaCustomerWebAPI\eSyaCustomer.IF\eSyaCustomer.IF\obj\Debug\netcoreapp2.2\HCP.Customer.IF.csproj.CoreCompileInputs.cache
+D:\OfficeWorkingProjects\AllWEBAPI\eSyaCustomerWebAPI\eSyaCustomer.IF\eSyaCustomer.IF\obj\Debug\netcoreapp2.2\HCP.Customer.IF.AssemblyInfoInputs.cache
+D:\OfficeWorkingProjects\AllWEBAPI\eSyaCustomerWebAPI\eSyaCustomer.IF\eSyaCustomer.IF\obj\Debug\netcoreapp2.2\HCP.Customer.IF.AssemblyInfo.cs
+D:\OfficeWorkingProjects\AllWEBAPI\eSyaCustomerWebAPI\eSyaCustomer.IF\eSyaCustomer.IF\obj\Debug\netcoreapp2.2\HCP.Customer.IF.csproj.CopyComplete
+D:\OfficeWorkingProjects\AllWEBAPI\eSyaCustomerWebAPI\eSyaCustomer.IF\eSyaCustomer.IF\obj\Debug\netcoreapp2.2\HCP.Customer.IF.dll
+D:\OfficeWorkingProjects\AllWEBAPI\eSyaCustomerWebAPI\eSyaCustomer.IF\eSyaCustomer.IF\obj\Debug\netcoreapp2.2\HCP.Customer.IF.pdb
+D:\eSya Project\Solution\Project_eSyaWebAPI\eSyaCustomer.WebAPI\trunk\eSyaCustomer.IF\eSyaCustomer.IF\bin\Debug\netcoreapp2.2\HCP.Customer.IF.deps.json
+D:\eSya Project\Solution\Project_eSyaWebAPI\eSyaCustomer.WebAPI\trunk\eSyaCustomer.IF\eSyaCustomer.IF\bin\Debug\netcoreapp2.2\HCP.Customer.IF.dll
+D:\eSya Project\Solution\Project_eSyaWebAPI\eSyaCustomer.WebAPI\trunk\eSyaCustomer.IF\eSyaCustomer.IF\bin\Debug\netcoreapp2.2\HCP.Customer.IF.pdb
+D:\eSya Project\Solution\Project_eSyaWebAPI\eSyaCustomer.WebAPI\trunk\eSyaCustomer.IF\eSyaCustomer.IF\bin\Debug\netcoreapp2.2\HCP.Customer.DO.dll
+D:\eSya Project\Solution\Project_eSyaWebAPI\eSyaCustomer.WebAPI\trunk\eSyaCustomer.IF\eSyaCustomer.IF\bin\Debug\netcoreapp2.2\HCP.Customer.DO.pdb
+D:\eSya Project\Solution\Project_eSyaWebAPI\eSyaCustomer.WebAPI\trunk\eSyaCustomer.IF\eSyaCustomer.IF\obj\Debug\netcoreapp2.2\HCP.Customer.IF.csprojAssemblyReference.cache
+D:\eSya Project\Solution\Project_eSyaWebAPI\eSyaCustomer.WebAPI\trunk\eSyaCustomer.IF\eSyaCustomer.IF\obj\Debug\netcoreapp2.2\HCP.Customer.IF.csproj.CoreCompileInputs.cache
+D:\eSya Project\Solution\Project_eSyaWebAPI\eSyaCustomer.WebAPI\trunk\eSyaCustomer.IF\eSyaCustomer.IF\obj\Debug\netcoreapp2.2\HCP.Customer.IF.AssemblyInfoInputs.cache
+D:\eSya Project\Solution\Project_eSyaWebAPI\eSyaCustomer.WebAPI\trunk\eSyaCustomer.IF\eSyaCustomer.IF\obj\Debug\netcoreapp2.2\HCP.Customer.IF.AssemblyInfo.cs
+D:\eSya Project\Solution\Project_eSyaWebAPI\eSyaCustomer.WebAPI\trunk\eSyaCustomer.IF\eSyaCustomer.IF\obj\Debug\netcoreapp2.2\HCP.Customer.IF.csproj.CopyComplete
+D:\eSya Project\Solution\Project_eSyaWebAPI\eSyaCustomer.WebAPI\trunk\eSyaCustomer.IF\eSyaCustomer.IF\obj\Debug\netcoreapp2.2\HCP.Customer.IF.dll
+D:\eSya Project\Solution\Project_eSyaWebAPI\eSyaCustomer.WebAPI\trunk\eSyaCustomer.IF\eSyaCustomer.IF\obj\Debug\netcoreapp2.2\HCP.Customer.IF.pdb

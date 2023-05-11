@@ -1,0 +1,32 @@
+﻿using eSyaCustomer.IF;
+using Microsoft.AspNetCore.Mvc;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+
+namespace eSyaCustomer.WebAPI.Controllers
+{
+    [Route("api/[controller]/[action]")]
+    [ApiController]
+    public class CommonDataController : ControllerBase
+    {
+        private readonly ICommonDataRepository _CommonDataRepository;
+        public CommonDataController(ICommonDataRepository CommonDataRepository)
+        {
+            _CommonDataRepository = CommonDataRepository;
+        }
+
+        /// <summary>
+        /// Get ISD Code
+        /// UI Reffered - Customer Contact
+        /// </summary>
+        /// <returns></returns>
+        [HttpGet]
+        public async Task<IActionResult> GetISDCodes()
+        {
+            var pa_rm = await _CommonDataRepository.GetISDCodes();
+            return Ok(pa_rm);
+        }
+    }
+}

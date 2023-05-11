@@ -1,0 +1,45 @@
+﻿using eSyaCustomer.DO;
+using eSyaCustomer.IF;
+using Microsoft.AspNetCore.Mvc;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+
+namespace eSyaCustomer.WebAPI.Controllers
+{
+    [Route("api/[controller]/[action]")]
+    [ApiController]
+    public class PatientPreRegistrationController : ControllerBase
+    {
+        private readonly IPatientPreRegistrationRepository _PatientPreRegistrationRepository;
+        public PatientPreRegistrationController(IPatientPreRegistrationRepository PatientPreRegistrationRepository)
+        {
+            _PatientPreRegistrationRepository = PatientPreRegistrationRepository;
+        }
+        /// <summary>
+        /// Get Patient PreRegistrations By Business Key
+        /// UI Reffered - Patient PreRegistrations
+        /// </summary>
+        /// <param name="Business Key"></param>
+        /// <returns></returns>
+        [HttpGet]
+        public async Task<IActionResult> GetPatientPreRegistrationsbyBusinessKey(int Businesskey)
+        {
+            var pr_regs = await _PatientPreRegistrationRepository.GetPatientPreRegistrationsbyBusinessKey(Businesskey);
+            return Ok(pr_regs);
+        }
+
+        /// <summary>
+        /// Insert into Patient PreRegistration.
+        /// UI Reffered - Patient PreRegistration
+        /// </summary>
+        [HttpPost]
+        public async Task<IActionResult> InsertPatientPreRegistration(DO_PatientPreRegistration obj)
+        {
+            var msg = await _PatientPreRegistrationRepository.InsertPatientPreRegistration(obj);
+            return Ok(msg);
+
+        }
+    }
+}

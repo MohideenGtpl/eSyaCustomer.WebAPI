@@ -1,0 +1,119 @@
+﻿using HCP.Customer.DO;
+using HCP.Customer.IF;
+using Microsoft.AspNetCore.Mvc;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+
+namespace eSyaCustomer.WebAPI.Controllers
+{
+    [Route("api/[controller]/[action]")]
+    [ApiController]
+    public class PatientPreRegistrationController : ControllerBase
+    {
+        private readonly IPatientPreRegistrationRepository _PatientPreRegistrationRepository;
+        public PatientPreRegistrationController(IPatientPreRegistrationRepository PatientPreRegistrationRepository)
+        {
+            _PatientPreRegistrationRepository = PatientPreRegistrationRepository;
+        }
+        /// <summary>
+        /// Get Patient PreRegistrations By Business Key
+        /// UI Reffered - Patient PreRegistrations
+        /// </summary>
+        /// <param name="Business Key"></param>
+        /// <returns></returns>
+        [HttpGet]
+        public async Task<IActionResult> GetPatientPreRegistrationsbyBusinessKey(int Businesskey)
+        {
+            var pr_regs = await _PatientPreRegistrationRepository.GetPatientPreRegistrationsbyBusinessKey(Businesskey);
+            return Ok(pr_regs);
+        }
+
+        /// <summary>
+        /// Insert into Patient PreRegistration.
+        /// UI Reffered - Patient PreRegistration
+        /// </summary>
+        [HttpPost]
+        public async Task<IActionResult> InsertPatientPreRegistration(DO_PatientPreRegistration obj)
+        {
+            var msg = await _PatientPreRegistrationRepository.InsertPatientPreRegistration(obj);
+            return Ok(msg);
+
+        }
+        /// <summary>
+        /// Get Isd Codes for Nationality Dropdown
+        /// UI Reffered - Patient PreRegistrations
+        /// </summary>
+        /// <param name="Business Key"></param>
+        /// <returns></returns>
+        [HttpGet]
+        public async Task<IActionResult> GetISDCodes()
+        {
+            var _na = await _PatientPreRegistrationRepository.GetISDCodes();
+            return Ok(_na);
+        }
+        /// <summary>
+        /// Get State List by Isd codes for State Dropdown
+        /// UI Reffered - Patient PreRegistrations
+        /// </summary>
+        /// <param name="isdCode"></param>
+        /// <returns></returns>
+        [HttpGet]
+        public async Task<IActionResult> GetStateList(int isdCode)
+        {
+            var _states = await _PatientPreRegistrationRepository.GetStateList(isdCode);
+            return Ok(_states);
+        }
+        /// <summary>
+        /// Get Patient City List for City Dropdown
+        /// UI Reffered - Patient PreRegistrations
+        /// </summary>
+        /// <param name="isdCodestateCode-"></param>
+        /// <returns></returns>
+        [HttpGet]
+        public async Task<IActionResult> GetCityList(int isdCode, int? stateCode)
+        {
+            var _cities = await _PatientPreRegistrationRepository.GetCityList(isdCode,stateCode);
+            return Ok(_cities);
+        }
+        /// <summary>
+        /// Get Patient Area List for Area Dropdown and pincode Text box
+        /// UI Reffered - Patient PreRegistrations
+        /// </summary>
+        /// <param name="pin code"></param>
+        /// <returns></returns>
+        [HttpGet]
+        public async Task<IActionResult> GetAreaList(int isdCode, int? stateCode, int? cityCode, string pincode)
+        {
+            var _areas = await _PatientPreRegistrationRepository.GetAreaList(isdCode,stateCode,cityCode,pincode);
+            return Ok(_areas);
+        }
+
+        /// <summary>
+        /// Get Patient Area details for select by default dropdown values based on  pincode Text box
+        /// UI Reffered - Patient PreRegistrations
+        /// </summary>
+        /// <param name="pin code"></param>
+        /// <returns></returns>
+        [HttpGet]
+        public async Task<IActionResult> GetAreaDetailsbyPincode(int isdCode, string pincode)
+        {
+            var _area = await _PatientPreRegistrationRepository.GetAreaDetailsbyPincode(isdCode,pincode);
+            return Ok(_area);
+        }
+
+        /// <summary>
+        /// Get Pincode by area code for auto fill Text Box
+        /// UI Reffered - Patient PreRegistrations
+        /// </summary>
+        /// <param name="area code"></param>
+        /// <returns></returns>
+        [HttpGet]
+        public async Task<IActionResult> GetPinCodebyAreaCode(int isdCode, int? stateCode, int? cityCode, int areacode)
+        {
+            var pincode = await _PatientPreRegistrationRepository.GetPinCodebyAreaCode(isdCode, stateCode,cityCode,areacode);
+            return Ok(pincode);
+        }
+    }
+}

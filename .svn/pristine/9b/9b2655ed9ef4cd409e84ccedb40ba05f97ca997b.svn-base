@@ -1,0 +1,45 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using eSyaCustomer.DL.Entities;
+using eSyaCustomer.DO;
+using eSyaCustomer.IF;
+using Microsoft.EntityFrameworkCore;
+
+namespace eSyaCustomer.DL.Repository
+{
+    public class CustomerMasterRepository: ICustomerMasterRepository
+    {
+        public async Task<List<DO_CustomerCodes>> GetCustomerCodesByNamePrefix(string customerNamePrefix)
+        {
+            try
+            {
+                using (var db = new eSyaEnterprise())
+                {
+                    var ds = db.GtEacscc
+                        .Where(w => (!String.IsNullOrEmpty(customerNamePrefix) && (customerNamePrefix != "All"))
+                        ? w.CustomerName.ToUpper().Trim().StartsWith(customerNamePrefix.ToUpper().Trim()) : true)
+                        .Select(r => new DO_CustomerCodes
+                        {
+                            CustomerId = r.CustomerId,
+                            CustomerShortName = r.CustomerShortName,
+                            CustomerName = r.CustomerName,
+                            CreditPeriod = r.CreditPeriod,
+                            CreditLimit = r.CreditLimit,
+                            ValidateLimit = r.ValidateLimit,
+                            CustomerOnHold = r.CustomerOnHold,
+                            ActiveStatus = r.ActiveStatus
+                        }).OrderBy(o => o.CustomerName).ToListAsync();
+
+                    return await ds;
+                }
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+    }
+}

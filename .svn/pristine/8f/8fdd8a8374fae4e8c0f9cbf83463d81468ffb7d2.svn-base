@@ -1,0 +1,33 @@
+﻿using eSyaCustomer.IF;
+using Microsoft.AspNetCore.Mvc;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+
+namespace eSyaCustomer.WebAPI.Controllers
+{
+    [Route("api/[controller]/[action]")]
+    [ApiController]
+    public class CustomerMasterController : ControllerBase
+    {
+        private readonly ICustomerMasterRepository _CustomerMasterRepository;
+        public CustomerMasterController(ICustomerMasterRepository customerMasterRepository)
+        {
+            _CustomerMasterRepository = customerMasterRepository;
+        }
+
+        /// <summary>
+        /// Get Customer Code Detail By Customer Name Prefix
+        /// UI Reffered - Customer Master
+        /// </summary>
+        /// <param name="customerNamePrefix"></param>
+        /// <returns></returns>
+        [HttpGet]
+        public async Task<IActionResult> GetCustomerCodesByNamePrefix(string customerNamePrefix)
+        {
+            var pa_rm = await _CustomerMasterRepository.GetCustomerCodesByNamePrefix(customerNamePrefix);
+            return Ok(pa_rm);
+        }
+    }
+}

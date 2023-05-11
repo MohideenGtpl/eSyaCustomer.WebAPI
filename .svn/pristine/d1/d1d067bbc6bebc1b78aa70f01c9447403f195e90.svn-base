@@ -1,0 +1,15 @@
+﻿using eSyaCustomer.DO;
+using System;
+using System.Collections.Generic;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace eSyaCustomer.IF
+{
+   public interface IPatientPreRegistrationRepository
+    {
+        Task<List<DO_PatientPreRegistration>> GetPatientPreRegistrationsbyBusinessKey(int Businesskey);
+
+        Task<DO_ReturnParameter> InsertPatientPreRegistration(DO_PatientPreRegistration obj);
+    }
+}

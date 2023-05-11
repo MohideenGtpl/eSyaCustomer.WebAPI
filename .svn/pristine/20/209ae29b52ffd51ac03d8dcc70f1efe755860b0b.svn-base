@@ -1,0 +1,38 @@
+﻿using eSyaCustomer.DL.Entities;
+using eSyaCustomer.DO;
+using eSyaCustomer.IF;
+using Microsoft.EntityFrameworkCore;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace eSyaCustomer.DL.Repository
+{
+    public class CommonDataRepository : ICommonDataRepository
+    {
+        public async Task<List<DO_CountryCodes>> GetISDCodes()
+        {
+            try
+            {
+                using (var db = new eSyaEnterprise())
+                {
+                    var ds = db.GtEccncd
+                        .Where(w => w.ActiveStatus)
+                        .Select(r => new DO_CountryCodes
+                        {
+                            Isdcode = r.Isdcode,
+                            CountryName = r.CountryName
+                        }).ToListAsync();
+
+                    return await ds;
+                }
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+    }
+}

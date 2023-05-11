@@ -1,0 +1,384 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using eSyaCustomer.DL.Entities;
+using eSyaCustomer.DO;
+using eSyaCustomer.IF;
+using Microsoft.EntityFrameworkCore;
+
+namespace eSyaCustomer.DL.Repository
+{
+    public class CustomerMasterRepository: ICustomerMasterRepository
+    {
+        public async Task<List<DO_CustomerCodes>> GetCustomerCodeInformationByNamePrefix(string customerNamePrefix)
+        {
+            try
+            {
+                using (var db = new eSyaEnterprise())
+                {
+                    var ds = db.GtEacscc
+                        .Where(w => (!String.IsNullOrEmpty(customerNamePrefix) && (customerNamePrefix != "All"))
+                        ? w.CustomerName.ToUpper().Trim().StartsWith(customerNamePrefix.ToUpper().Trim()) : true)
+                        .Select(r => new DO_CustomerCodes
+                        {
+                            CustomerId = r.CustomerId,
+                            CustomerName = r.CustomerName,
+                            CreditPeriod = r.CreditPeriod,
+                            CreditLimit = r.CreditLimit,
+                            ValidateLimit = r.ValidateLimit,
+                            CustomerOnHold = r.CustomerOnHold,
+                            IsLimitBreakupReqd = r.IsLimitBreakupReqd,
+                            ActiveStatus = r.ActiveStatus
+                        }).OrderBy(o => o.CustomerName).ToListAsync();
+
+                    return await ds;
+                }
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+
+        public async Task<List<DO_CustomerCodes>> GetCustomerCodeInformationByCustomerId(int customerId)
+        {
+            try
+            {
+                using (var db = new eSyaEnterprise())
+                {
+                    var ds = db.GtEacscc
+                        .Where(w => w.CustomerId == customerId)
+                        .Select(r => new DO_CustomerCodes
+                        {
+                            CustomerName = r.CustomerName,
+                            CreditPeriod = r.CreditPeriod,
+                            CreditLimit = r.CreditLimit,
+                            ValidateLimit = r.ValidateLimit,
+                            CustomerOnHold = r.CustomerOnHold,
+                            IsLimitBreakupReqd = r.IsLimitBreakupReqd,
+                            ActiveStatus = r.ActiveStatus
+                        }).OrderBy(o => o.CustomerName).ToListAsync();
+
+                    return await ds;
+                }
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+
+        public async Task<DO_ReturnParameter> InsertIntoCustomerCode(DO_CustomerCodes obj)
+        {
+            using (var db = new eSyaEnterprise())
+            {
+                using (var dbContext = db.Database.BeginTransaction())
+                {
+                    try
+                    {
+                        bool is_CustomerNameExist = db.GtEacscc.Any(a => a.CustomerName.Trim().ToUpper() == obj.CustomerName.Trim().ToUpper());
+                        if (is_CustomerNameExist)
+                        {
+                            return new DO_ReturnParameter() { Status = false, Message = "Customer Name is already exist." };
+                        }
+                        int maxval = db.GtEacscc.Select(c => c.CustomerId).DefaultIfEmpty().Max();
+                        int _customerId = maxval + 1;
+                        var pa_rm = new GtEacscc
+                        {
+                            CustomerId = _customerId,
+                            CustomerName = obj.CustomerName,
+                            CreditPeriod = obj.CreditPeriod,
+                            CreditLimit = obj.CreditLimit,
+                            ValidateLimit = obj.ValidateLimit,
+                            CustomerOnHold = obj.CustomerOnHold,
+                            HoldReason = obj.HoldReason,
+                            IsLimitBreakupReqd = obj.IsLimitBreakupReqd,
+                            ActiveStatus = obj.ActiveStatus,
+                            FormId = obj.FormID,
+                            CreatedBy = obj.UserID,
+                            CreatedOn = DateTime.Now,
+                            CreatedTerminal = obj.TerminalID
+
+                        };
+                        db.GtEacscc.Add(pa_rm);
+
+                        await db.SaveChangesAsync();
+                        dbContext.Commit();
+
+                        return new DO_ReturnParameter() { Status = true, Message = "Customer Created Successfully." };
+                    }
+                    catch (DbUpdateException ex)
+                    {
+                        dbContext.Rollback();
+                        throw new Exception(CommonMethod.GetValidationMessageFromException(ex));
+                    }
+                    catch (Exception ex)
+                    {
+                        dbContext.Rollback();
+                        throw ex;
+                    }
+                }
+            }
+        }
+
+        public async Task<DO_ReturnParameter> UpdateCustomerCode(DO_CustomerCodes obj)
+        {
+            using (var db = new eSyaEnterprise())
+            {
+                using (var dbContext = db.Database.BeginTransaction())
+                {
+                    try
+                    {
+                        var is_CustomerNameExist = db.GtEacscc.Where(w => w.CustomerName.Trim().ToUpper().Replace(" ", "") == obj.CustomerName.Trim().ToUpper().Replace(" ", "")
+                                && w.CustomerId != obj.CustomerId).FirstOrDefault();
+                        if (is_CustomerNameExist != null)
+                        {
+                            return new DO_ReturnParameter() { Status = false, Message = "Customer Name is already exist." };
+                        }
+
+                        GtEacscc cs_cc = db.GtEacscc.Where(w => w.CustomerId == obj.CustomerId).FirstOrDefault();
+                        if (cs_cc == null)
+                        {
+                            return new DO_ReturnParameter() { Status = false, Message = "Customer is not exist" };
+                        }
+
+                        cs_cc.CustomerName = obj.CustomerName;
+                        cs_cc.CreditPeriod = obj.CreditPeriod;
+                        cs_cc.CreditLimit = obj.CreditLimit;
+                        cs_cc.ValidateLimit = obj.ValidateLimit;
+                        cs_cc.ActiveStatus = obj.ActiveStatus;
+                        cs_cc.ModifiedBy = obj.UserID;
+                        cs_cc.ModifiedOn = DateTime.Now;
+                        cs_cc.ModifiedTerminal = obj.TerminalID;
+                        await db.SaveChangesAsync();
+                        dbContext.Commit();
+
+                        return new DO_ReturnParameter() { Status = true, Message = "Customer Updated Successfully." };
+                    }
+                    catch (DbUpdateException ex)
+                    {
+                        dbContext.Rollback();
+                        throw new Exception(CommonMethod.GetValidationMessageFromException(ex));
+                    }
+                    catch (Exception ex)
+                    {
+                        dbContext.Rollback();
+                        throw ex;
+                    }
+                }
+            }
+        }
+
+        public async Task<List<DO_CustomerContact>> GetCustomerContactInformationByCustomerId(int customerId)
+        {
+            try
+            {
+                using (var db = new eSyaEnterprise())
+                {
+                    var ds = db.GtEacscd
+                        .Where(w => w.CustomerId == customerId)
+                        .Select(r => new DO_CustomerContact
+                        {
+                            CustomerLocation = r.CustomerLocation,
+                            IsLocationDefault = r.IsLocationDefault,
+                            Isdcode = r.Isdcode,
+                            ContactPerson = r.ContactPerson,
+                            Address = r.Address,
+                            RegisteredMobileNumber = r.RegisteredMobileNumber,
+                            EMailId = r.EMailId,
+                            ActiveStatus = r.ActiveStatus
+                        }).ToListAsync();
+
+                    return await ds;
+                }
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+
+        public async Task<DO_ReturnParameter> InsertIntoCustomerContact(DO_CustomerContact obj)
+        {
+            using (var db = new eSyaEnterprise())
+            {
+                using (var dbContext = db.Database.BeginTransaction())
+                {
+                    try
+                    {
+                        bool is_CustomerContactExist = db.GtEacscd.Any(a => a.CustomerId == obj.CustomerId && a.CustomerLocation == obj.CustomerLocation);
+                        if (is_CustomerContactExist)
+                        {
+                            return new DO_ReturnParameter() { Status = false, Message = "Customer Contact is already exist." };
+                        }
+
+                        int maxval = db.GtEacscc.Select(c => c.CustomerId).DefaultIfEmpty().Max();
+                        int _customerLocation = maxval + 1;
+                        var cs_cd = new GtEacscd
+                        {
+                            CustomerId = obj.CustomerId,
+                            CustomerLocation = _customerLocation,
+                            IsLocationDefault = obj.IsLocationDefault,
+                            Isdcode = obj.Isdcode,
+                            ContactPerson = obj.ContactPerson,
+                            Address = obj.Address,
+                            RegisteredMobileNumber = obj.RegisteredMobileNumber,
+                            EMailId = obj.EMailId,
+                            ActiveStatus = obj.ActiveStatus,
+                            FormId = obj.FormId,
+                            CreatedBy = obj.UserID,
+                            CreatedOn = DateTime.Now,
+                            CreatedTerminal = obj.TerminalID
+
+                        };
+                        db.GtEacscd.Add(cs_cd);
+
+                        await db.SaveChangesAsync();
+                        dbContext.Commit();
+
+                        return new DO_ReturnParameter() { Status = true, Message = "Customer Contact Created Successfully." };
+                    }
+                    catch (DbUpdateException ex)
+                    {
+                        dbContext.Rollback();
+                        throw new Exception(CommonMethod.GetValidationMessageFromException(ex));
+                    }
+                    catch (Exception ex)
+                    {
+                        dbContext.Rollback();
+                        throw ex;
+                    }
+                }
+            }
+        }
+
+        public async Task<DO_ReturnParameter> UpdateCustomerContact(DO_CustomerContact obj)
+        {
+            using (var db = new eSyaEnterprise())
+            {
+                using (var dbContext = db.Database.BeginTransaction())
+                {
+                    try
+                    {
+                        var is_CustomerContactExist = db.GtEacscd.Where(w => w.CustomerId == obj.CustomerId && w.CustomerLocation != obj.CustomerLocation).FirstOrDefault();
+                        if (is_CustomerContactExist != null)
+                        {
+                            return new DO_ReturnParameter() { Status = false, Message = "Customer Contact is already exist." };
+                        }
+
+                        GtEacscd cs_cd = db.GtEacscd.Where(w => w.CustomerId == obj.CustomerId && w.CustomerLocation == obj.CustomerLocation).FirstOrDefault();
+                        if (cs_cd == null)
+                        {
+                            return new DO_ReturnParameter() { Status = false, Message = "Customer Contact is not exist" };
+                        }
+
+                        cs_cd.IsLocationDefault = obj.IsLocationDefault;
+                        cs_cd.Isdcode = obj.Isdcode;
+                        cs_cd.ContactPerson = obj.ContactPerson;
+                        cs_cd.Address = obj.Address;
+                        cs_cd.RegisteredMobileNumber = obj.RegisteredMobileNumber;
+                        cs_cd.EMailId = obj.EMailId;
+                        cs_cd.ActiveStatus = obj.ActiveStatus;
+                        cs_cd.ModifiedBy = obj.UserID;
+                        cs_cd.ModifiedOn = DateTime.Now;
+                        cs_cd.ModifiedTerminal = obj.TerminalID;
+
+                        await db.SaveChangesAsync();
+                        dbContext.Commit();
+
+                        return new DO_ReturnParameter() { Status = true, Message = "Customer Contact Updated Successfully." };
+                    }
+                    catch (DbUpdateException ex)
+                    {
+                        dbContext.Rollback();
+                        throw new Exception(CommonMethod.GetValidationMessageFromException(ex));
+                    }
+                    catch (Exception ex)
+                    {
+                        dbContext.Rollback();
+                        throw ex;
+                    }
+                }
+            }
+        }
+
+        public async Task<List<DO_CustomerBusinessLocation>> GetCustomerBusinessLocationByCustomerId(int customerId)
+        {
+            try
+            {
+                using (var db = new eSyaEnterprise())
+                {
+                    var ds = db.GtEacsbl
+                        .Where(w => w.CustomerId == customerId)
+                        .Select(r => new DO_CustomerBusinessLocation
+                        {
+                            CustomerId = r.CustomerId,
+                            BusinessKey = r.BusinessKey,
+                            ActiveStatus = r.ActiveStatus
+                        }).ToListAsync();
+
+                    return await ds;
+                }
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+
+        public async Task<DO_ReturnParameter> InsertOrUpdateCustomerBusinessLocation(List<DO_CustomerBusinessLocation> obj)
+        {
+            using (var db = new eSyaEnterprise())
+            {
+                using (var dbContext = db.Database.BeginTransaction())
+                {
+                    try
+                    {
+                        foreach (var bl in obj.Where(w => w.BusinessKey >0))
+                        {
+                            GtEacsbl cs_bl = db.GtEacsbl.Where(x => x.CustomerId == bl.CustomerId
+                                            && x.BusinessKey == bl.BusinessKey).FirstOrDefault();
+                            if (cs_bl == null)
+                            {
+                                var o_csbl = new GtEacsbl
+                                {
+                                    CustomerId = bl.CustomerId,
+                                    BusinessKey = bl.BusinessKey,
+                                    ActiveStatus = bl.ActiveStatus,
+                                    FormId = bl.FormId,
+                                    CreatedBy = bl.UserID,
+                                    CreatedOn = System.DateTime.Now,
+                                    CreatedTerminal = bl.TerminalID
+                                };
+                                db.GtEacsbl.Add(o_csbl);
+                            }
+                            else
+                            {
+                                cs_bl.ActiveStatus = bl.ActiveStatus;
+                                cs_bl.ModifiedBy = bl.UserID;
+                                cs_bl.ModifiedOn = System.DateTime.Now;
+                                cs_bl.ModifiedTerminal = bl.TerminalID;
+                            }
+                            await db.SaveChangesAsync();
+                        }
+
+                        dbContext.Commit();
+                        return new DO_ReturnParameter() { Status = true, Message = "Saved Successfully." };
+                    }
+                    catch (DbUpdateException ex)
+                    {
+                        dbContext.Rollback();
+                        throw new Exception(CommonMethod.GetValidationMessageFromException(ex));
+                    }
+                    catch (Exception ex)
+                    {
+                        dbContext.Rollback();
+                        throw ex;
+                    }
+                }
+            }
+        }
+    }
+}

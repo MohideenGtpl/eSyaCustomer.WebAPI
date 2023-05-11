@@ -1,0 +1,203 @@
+﻿using eSyaCustomer.DO;
+using eSyaCustomer.IF;
+using Microsoft.AspNetCore.Mvc;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+
+namespace eSyaCustomer.WebAPI.Controllers
+{
+    [Route("api/[controller]/[action]")]
+    [ApiController]
+    public class CustomerMasterController : ControllerBase
+    {
+        private readonly ICustomerMasterRepository _CustomerMasterRepository;
+        public CustomerMasterController(ICustomerMasterRepository customerMasterRepository)
+        {
+            _CustomerMasterRepository = customerMasterRepository;
+        }
+
+        /// <summary>
+        /// Get Customer Code Detail Information By Customer Name Prefix
+        /// UI Reffered - Customer Code
+        /// </summary>
+        /// <param name="customerNamePrefix"></param>
+        /// <returns></returns>
+        [HttpGet]
+        public async Task<IActionResult> GetCustomerCodeInformationByNamePrefix(string customerNamePrefix)
+        {
+            var pa_rm = await _CustomerMasterRepository.GetCustomerCodeInformationByNamePrefix(customerNamePrefix);
+            return Ok(pa_rm);
+        }
+
+        /// <summary>
+        /// Get Customer Code Detail Information By Customer Name Prefix and Customer On Hold
+        /// UI Reffered - Customer Hold
+        /// </summary>
+        /// <param name="customerNamePrefix"></param>
+        /// <param name="customerOnHold"></param>
+        /// <returns></returns>
+        [HttpGet]
+        public async Task<IActionResult> GetCustomerCodeInformationByNamePrefixOnHold(string customerNamePrefix, string customerOnHold)
+        {
+            var pa_rm = await _CustomerMasterRepository.GetCustomerCodeInformationByNamePrefixOnHold(customerNamePrefix, customerOnHold);
+            return Ok(pa_rm);
+        }
+
+
+        /// <summary>
+        /// Get Customer Code Information By Customer Id
+        /// UI Reffered - Customer Code
+        /// </summary>
+        /// <param name="customerId"></param>
+        /// <returns></returns>
+        [HttpGet]
+        public async Task<IActionResult> GetCustomerCodeInformationByCustomerId(int customerId)
+        {
+            var pa_rm = await _CustomerMasterRepository.GetCustomerCodeInformationByCustomerId(customerId);
+            return Ok(pa_rm);
+        }
+
+        /// <summary>
+        /// Insert into Customer Code.
+        /// UI Reffered - Customer Code
+        /// </summary>
+        [HttpPost]
+        public async Task<IActionResult> InsertIntoCustomerCode(DO_CustomerCodes obj)
+        {
+            var msg = await _CustomerMasterRepository.InsertIntoCustomerCode(obj);
+            return Ok(msg);
+
+        }
+
+        /// <summary>
+        /// Update Customer Code.
+        /// UI Reffered - Customer Code
+        /// </summary>
+        [HttpPost]
+        public async Task<IActionResult> UpdateCustomerCode(DO_CustomerCodes obj)
+        {
+            var msg = await _CustomerMasterRepository.UpdateCustomerCode(obj);
+            return Ok(msg);
+
+        }
+
+        /// <summary>
+        /// Get Customer Contact Information By Customer Id
+        /// UI Reffered - Customer Code
+        /// </summary>
+        /// <param name="customerId"></param>
+        /// <returns></returns>
+        [HttpGet]
+        public async Task<IActionResult> GetCustomerContactInformationByCustomerId(int customerId)
+        {
+            var pa_rm = await _CustomerMasterRepository.GetCustomerContactInformationByCustomerId(customerId);
+            return Ok(pa_rm);
+        }
+
+        /// <summary>
+        /// Get Customer Contact Information By Customer Id and Location Id
+        /// UI Reffered - Customer Code
+        /// </summary>
+        /// <param name="customerId"></param>
+        /// <param name="locationId"></param>
+        /// <returns></returns>
+        [HttpGet]
+        public async Task<IActionResult> GetCustomerContactInformationByCustomerIdLocId(int customerId,int locationId)
+        {
+            var pa_rm = await _CustomerMasterRepository.GetCustomerContactInformationByCustomerIdLocId(customerId, locationId);
+            return Ok(pa_rm);
+        }
+
+
+        /// <summary>
+        /// Insert into Customer Contact.
+        /// UI Reffered - Customer Code
+        /// </summary>
+        [HttpPost]
+        public async Task<IActionResult> InsertIntoCustomerContact(DO_CustomerContact obj)
+        {
+            var msg = await _CustomerMasterRepository.InsertIntoCustomerContact(obj);
+            return Ok(msg);
+
+        }
+
+        /// <summary>
+        /// Update Customer Contact.
+        /// UI Reffered - Customer Code
+        /// </summary>
+        [HttpPost]
+        public async Task<IActionResult> UpdateCustomerContact(DO_CustomerContact obj)
+        {
+            var msg = await _CustomerMasterRepository.UpdateCustomerContact(obj);
+            return Ok(msg);
+
+        }
+
+        /// <summary>
+        /// Get Customer Business Location By Customer Id
+        /// UI Reffered - Customer Code
+        /// </summary>
+        /// <param name="customerId"></param>
+        /// <returns></returns>
+        [HttpGet]
+        public async Task<IActionResult> GetCustomerBusinessLocationByCustomerId(int customerId)
+        {
+            var pa_rm = await _CustomerMasterRepository.GetCustomerBusinessLocationByCustomerId(customerId);
+            return Ok(pa_rm);
+        }
+
+        /// <summary>
+        /// Insert into Customer Business Location.
+        /// UI Reffered - Customer Code
+        /// </summary>
+        [HttpPost]
+        public async Task<IActionResult> InsertOrUpdateCustomerBusinessLocation(List<DO_CustomerBusinessLocation> obj)
+        {
+            var msg = await _CustomerMasterRepository.InsertOrUpdateCustomerBusinessLocation(obj);
+            return Ok(msg);
+
+        }
+
+        /// <summary>
+        /// Get Customer Statutory Information By Customer Id , Location Id and IsdCode
+        /// UI Reffered - Customer Code
+        /// </summary>
+        /// <param name="customerId"></param>
+        /// <param name="locationId"></param>
+        /// <param name="isdCode"></param>
+        /// <returns></returns>
+        [HttpGet]
+        public async Task<IActionResult> GetStatutoryInformationByCusIdLocIdIsdCode(int customerId, int locationId, int isdCode)
+        {
+            var pa_rm = await _CustomerMasterRepository.GetStatutoryInformationByCusIdLocIdIsdCode(customerId, locationId, isdCode);
+            return Ok(pa_rm);
+        }
+
+        /// <summary>
+        /// Insert into Customer Statutory Detail.
+        /// UI Reffered - Customer Code
+        /// </summary>
+        [HttpPost]
+        public async Task<IActionResult> InsertOrUpdateCustomerStatutoryDetail(List<DO_CustomerStatutoryDetail> obj)
+        {
+            var msg = await _CustomerMasterRepository.InsertOrUpdateCustomerStatutoryDetail(obj);
+            return Ok(msg);
+
+        }
+
+        /// <summary>
+        /// Update Customer Codes for Hold Status.
+        /// UI Reffered - Customer Hold
+        /// </summary>
+        [HttpPost]
+        public async Task<IActionResult> UpdateCustomerCodeForHold(DO_CustomerCodes obj)
+        {
+            var msg = await _CustomerMasterRepository.UpdateCustomerCodeForHold(obj);
+            return Ok(msg);
+
+        }
+
+    }
+}

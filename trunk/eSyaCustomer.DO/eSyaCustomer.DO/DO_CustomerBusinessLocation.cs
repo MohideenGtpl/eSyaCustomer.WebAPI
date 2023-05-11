@@ -1,0 +1,18 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Text;
+
+namespace HCP.Customer.DO
+{
+    public class DO_CustomerBusinessLocation
+    {
+        public int CustomerId { get; set; }
+        public string SegmentDesc { get; set; }
+        public string LocationDescription { get; set; }
+        public int BusinessKey { get; set; }
+        public bool ActiveStatus { get; set; }
+        public string FormId { get; set; }
+        public int UserID { get; set; }
+        public string TerminalID { get; set; }
+    }
+}
